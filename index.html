@@ -108,11 +108,11 @@
 
         // 3. TUG logic (Lower is better)
         const tugNorm = (age < 70) ? 8.1 : (age < 80) ? 9.2 : 11.3;
-        findings.push(processTest('tug-res', 'Timed Up and Go', tugVal, tugNorm, 's', false, "functional mobility"));
+        findings.push(processTest('tug-res', 'Timed Up and Go', tugVal, tugNorm, 's', false, "functional mobility (TUG)"));
 
         // 4. Grip logic
         const gripNorm = getGripNorm(age, gender);
-        findings.push(processTest('grip-res', 'Grip Strength', gripVal, gripNorm, 'kg', true, "upper limb strength"));
+        findings.push(processTest('grip-res', 'Grip Strength', gripVal, gripNorm, 'kg', true, "upper limb strength (GRIP)"));
 
         // Generate Clinical Narrative
         const summaryBox = document.getElementById('summary-output');
@@ -146,10 +146,10 @@
     function processSTS(val, norm) {
         if(isNaN(val)) { document.getElementById('sts-res').style.display = 'none'; return null; }
         document.getElementById('sts-res').style.display = 'block';
-        let status = "Average"; let color = "status-green"; let bg = "bg-green"; let obs = "functional lower limb strength";
+        let status = "Average"; let color = "status-green"; let bg = "bg-green"; let obs = "functional lower limb strength (STS)";
         
-        if(val < norm.b) { status = "Below Average"; color = "status-red"; bg = "bg-red"; obs = "lower limb strength deficits"; }
-        else if(val > norm.av) { status = "Above Average"; color = "status-blue"; bg = "bg-blue"; obs = "excellent lower limb strength"; }
+        if(val < norm.b) { status = "Below Average"; color = "status-red"; bg = "bg-red"; obs = "lower limb strength deficits (STS)"; }
+        else if(val > norm.av) { status = "Above Average"; color = "status-blue"; bg = "bg-blue"; obs = "excellent lower limb strength (STS)"; }
 
         document.getElementById('sts-res').className = `result-card ${color}`;
         document.getElementById('sts-res').innerHTML = `<strong>STS (30s)</strong><br>Patient: ${val} reps | Norm: ${norm.b}-${norm.av} reps<br><span class="tag ${bg}">${status}</span>`;
