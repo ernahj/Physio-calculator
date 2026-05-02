@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhysioStats | Comparison Pro</title>
+    <title>PhysioStats | Clinical Comparison Pro</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -42,16 +42,18 @@
         .diff-text { font-weight: bold; font-size: 0.9rem; margin-top: 5px; display: block; }
         .improvement { color: var(--norm); }
         .decline { color: var(--below); }
+        .sig-badge { background: #34495e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px; vertical-align: middle; }
 
         #summary-output { margin-top: 20px; padding: 20px; background: #eef2f3; border-radius: 8px; line-height: 1.6; border: 1px solid #d1d8dd; }
         .tag { display: inline-block; padding: 3px 8px; border-radius: 4px; color: white; font-size: 0.75rem; font-weight: bold; margin-top: 5px; }
+        .disclaimer { font-size: 0.75rem; color: #777; margin-top: 25px; font-style: italic; border-top: 1px solid #eee; padding-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>PhysioStats Clinical</h1>
-    <div class="subtitle">Cardiac & Respiratory Results Comparison</div>
+    <div class="subtitle">Advanced Assessment & Comparison Tool</div>
     
     <div class="section-title">1. Patient Profile</div>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
@@ -106,6 +108,7 @@
     <div id="results">
         <div id="summary-output"></div>
         <div id="cards-container"></div>
+        <p class="disclaimer"><strong>Clinical Disclaimer:</strong> All comparisons are made against age and gender-matched healthy population norms. For patients with chronic respiratory or cardiac conditions, these results should be used to track longitudinal progress rather than as absolute diagnostic criteria. Individual MCID (Minimal Clinically Important Difference) values are applied to progress assessments.</p>
     </div>
 </div>
 
@@ -116,13 +119,16 @@
         document.getElementById('results').style.display = 'none';
     }
 
+    // Thresholds for Clinical Significance (MCID)
+    const MCID = { mwt: 30, sts: 2, tug: 1.5, grip: 5, mets: 0.5 };
+
     function calculate() {
         const age = parseInt(document.getElementById('age').value);
         const gender = document.getElementById('gender').value;
         const h = parseFloat(document.getElementById('height').value);
         const w = parseFloat(document.getElementById('weight').value);
 
-        if(!age || isNaN(age)) { alert("Please enter at least the patient's age."); return; }
+        if(!age || isNaN(age)) { alert("Please enter patient age."); return; }
 
         document.getElementById('results').style.display = 'block';
         const container = document.getElementById('cards-container');
@@ -130,35 +136,27 @@
         let clinicalFindings = [];
         let progressFindings = [];
 
-        // --- NORM CALCULATIONS ---
         const mwtNorm = (gender === 'male') ? 489.22 - (4.33 * age) + (3.19 * h) - (2.18 * w) : 498.06 - (4.80 * age) + (2.64 * h) - (1.24 * w);
         const metsNorm = 14.7 - (0.11 * age);
         const tugNorm = (age < 70) ? 8.1 : (age < 80) ? 9.2 : 11.3;
         
-        // --- PROCESS EACH TEST ---
-        // 6MWT
-        processTest(container, "6-Minute Walk Test", "mwt_curr", "mwt_prev", mwtNorm, "m", true, "aerobic capacity", clinicalFindings, progressFindings);
-        // STS
+        processTest(container, "6-Minute Walk Test", "mwt_curr", "mwt_prev", mwtNorm, "m", true, "aerobic capacity", "6MWT", MCID.mwt, clinicalFindings, progressFindings);
         const stsNormData = getSTSNorm(age, gender);
-        processTest(container, "Sit to Stand (30s)", "sts_curr", "sts_prev", stsNormData.av, " reps", true, "lower limb strength", clinicalFindings, progressFindings);
-        // TUG
-        processTest(container, "Timed Up and Go", "tug_curr", "tug_prev", tugNorm, "s", false, "functional mobility", clinicalFindings, progressFindings);
-        // Grip
+        processTest(container, "Sit to Stand (30s)", "sts_curr", "sts_prev", stsNormData.av, " reps", true, "lower limb strength", "STS", MCID.sts, clinicalFindings, progressFindings);
+        processTest(container, "Timed Up and Go", "tug_curr", "tug_prev", tugNorm, "s", false, "functional mobility", "TUG", MCID.tug, clinicalFindings, progressFindings);
         const gripNorm = getGripNorm(age, gender);
-        processTest(container, "Grip Strength", "grip_curr", "grip_prev", gripNorm, "kg", true, "upper limb strength", clinicalFindings, progressFindings);
-        // METS
-        processTest(container, "Ergometry (METs)", "mets_curr", "mets_prev", metsNorm, " METs", true, "exercise tolerance", clinicalFindings, progressFindings);
+        processTest(container, "Grip Strength", "grip_curr", "grip_prev", gripNorm, "kg", true, "upper limb strength", "Grip", MCID.grip, clinicalFindings, progressFindings);
+        processTest(container, "Ergometry (METs)", "mets_curr", "mets_prev", metsNorm, " METs", true, "exercise tolerance", "METs", MCID.mets, clinicalFindings, progressFindings);
 
-        // --- SUMMARY NARRATIVE ---
         const summaryBox = document.getElementById('summary-output');
-        let narrative = `<strong>Baseline Status:</strong> The patient currently demonstrates ${clinicalFindings.join(', ')}.`;
+        let narrative = `<strong>Baseline Status:</strong> The patient demonstrates ${clinicalFindings.join(', ')}.`;
         if(progressFindings.length > 0) {
-            narrative += `<br><br><strong>Progress Report:</strong> Since previous assessment, the patient has shown ${progressFindings.join(', ')}.`;
+            narrative += `<br><br><strong>Progress Report:</strong> Since the previous assessment, the patient has shown ${progressFindings.join(', ')}.`;
         }
         summaryBox.innerHTML = narrative;
     }
 
-    function processTest(target, title, currId, prevId, norm, unit, higherIsBetter, label, clinicalArr, progressArr) {
+    function processTest(target, title, currId, prevId, norm, unit, higherIsBetter, label, testName, mcidVal, clinicalArr, progressArr) {
         const curr = parseFloat(document.getElementById(currId).value);
         const prev = parseFloat(document.getElementById(prevId).value);
         if(isNaN(curr)) return;
@@ -167,34 +165,35 @@
         let status = ""; let color = ""; let obs = "";
 
         if(higherIsBetter) {
-            if(pct < 70) { status = "Significantly Below"; color = "status-red"; obs = "reduced " + label; }
-            else if(pct < 85) { status = "Below Average"; color = "status-yellow"; obs = "mildly limited " + label; }
-            else { status = "Within Norms"; color = "status-green"; obs = "preserved " + label; }
+            if(pct < 70) { status = "Significantly Below"; color = "status-red"; obs = `reduced ${label} (${testName})`; }
+            else if(pct < 85) { status = "Below Average"; color = "status-yellow"; obs = `mildly limited ${label} (${testName})`; }
+            else { status = "Within Norms"; color = "status-green"; obs = `preserved ${label} (${testName})`; }
         } else {
-            if(curr > norm * 1.3) { status = "Significantly Below"; color = "status-red"; obs = "impaired " + label; }
-            else { status = "Within Norms"; color = "status-green"; obs = "normal " + label; }
+            if(curr > norm * 1.3) { status = "Significantly Below"; color = "status-red"; obs = `impaired ${label} (${testName})`; }
+            else { status = "Within Norms"; color = "status-green"; obs = `normal ${label} (${testName})`; }
         }
-
         clinicalArr.push(obs);
 
         let diffHtml = "";
         if(!isNaN(prev)) {
             const diff = curr - prev;
+            const absDiff = Math.abs(diff);
             const isImprovement = higherIsBetter ? diff > 0 : diff < 0;
+            const isSignificant = absDiff >= mcidVal;
+            const sigBadge = isSignificant ? `<span class="sig-badge">SIGNIFICANT</span>` : "";
+            
             const classType = isImprovement ? "improvement" : "decline";
             const trendWord = isImprovement ? "improvement" : "decline";
-            diffHtml = `<span class="diff-text ${classType}">${diff > 0 ? '+' : ''}${diff.toFixed(1)}${unit} change (${trendWord})</span>`;
-            progressArr.push(`a ${trendWord} in ${label} (${diff > 0 ? '+' : ''}${diff.toFixed(1)}${unit})`);
+            
+            diffHtml = `<span class="diff-text ${classType}">${diff > 0 ? '+' : ''}${diff.toFixed(1)}${unit} change (${trendWord})${sigBadge}</span>`;
+            
+            let sigText = isSignificant ? "a significant " : "a ";
+            progressArr.push(`${sigText}${trendWord} in ${label} [${testName}] (${diff > 0 ? '+' : ''}${diff.toFixed(1)}${unit})`);
         }
 
         const card = document.createElement('div');
         card.className = `result-card ${color}`;
-        card.innerHTML = `
-            <strong>${title}</strong><br>
-            Current: ${curr}${unit} | Predicted Norm: ${norm.toFixed(1)}${unit}<br>
-            <span class="tag ${color.replace('status', 'bg')}">${status} (${pct.toFixed(0)}%)</span>
-            ${diffHtml}
-        `;
+        card.innerHTML = `<strong>${title}</strong><br>Current: ${curr}${unit} | Norm: ${norm.toFixed(1)}${unit}<br><span class="tag ${color.replace('status', 'bg')}">${status} (${pct.toFixed(0)}%)</span>${diffHtml}`;
         target.appendChild(card);
     }
 
