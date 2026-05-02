@@ -3,161 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhysioStats | Results Calculator</title>
+    <title>PhysioStats | Clinical Version</title>
     <style>
         :root {
             --primary: #2c3e50;
-            --below: #e74c3c; /* Red */
-            --norm: #27ae60;  /* Green */
-            --above: #2980b9; /* Blue */
+            --below: #e74c3c; /* Red - Significantly Below */
+            --warning: #f39c12; /* Yellow - Mildly Below */
+            --norm: #27ae60;  /* Green - In Norm */
+            --above: #2980b9; /* Blue - Above Norm */
             --bg: #f4f7f6;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--primary);
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        h1 { text-align: center; color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        h2 { font-size: 1.2rem; margin-top: 25px; color: #555; }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--primary); padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
         .input-group { display: flex; flex-direction: column; }
         label { font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
-        input, select {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        button:hover { background-color: #34495e; }
-
-        #results {
-            margin-top: 30px;
-            display: none;
-        }
-
-        .result-card {
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border-left: 10px solid #ccc;
-            background: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; }
+        
+        #results { margin-top: 30px; display: none; }
+        .result-card { padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 10px solid #ccc; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .status-red { border-left-color: var(--below); background-color: #fdf2f2; }
+        .status-yellow { border-left-color: var(--warning); background-color: #fffaf0; }
         .status-green { border-left-color: var(--norm); background-color: #f2fdf5; }
         .status-blue { border-left-color: var(--above); background-color: #f2f7fd; }
-
-        .tag {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            color: white;
-            margin-top: 10px;
-        }
-
+        
+        .tag { display: inline-block; padding: 4px 10px; border-radius: 4px; font-weight: bold; color: white; margin-top: 8px; font-size: 0.8rem; }
         .bg-red { background: var(--below); }
+        .bg-yellow { background: var(--warning); }
         .bg-green { background: var(--norm); }
         .bg-blue { background: var(--above); }
 
-        footer { text-align: center; margin-top: 40px; font-size: 0.8rem; color: #888; }
+        #summary-output { margin-top: 20px; padding: 20px; background: #eef2f3; border-radius: 8px; line-height: 1.6; }
+        .disclaimer { font-size: 0.75rem; color: #777; margin-top: 20px; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Physio Calculator</h1>
+    <h1>PhysioStats Clinical</h1>
     
     <h2>1. Patient Profile</h2>
     <div class="grid">
-        <div class="input-group">
-            <label>Age (Years)</label>
-            <input type="number" id="age" placeholder="e.g. 65">
-        </div>
+        <div class="input-group"><label>Age</label><input type="number" id="age"></div>
         <div class="input-group">
             <label>Gender</label>
-            <select id="gender">
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-            </select>
+            <select id="gender"><option value="male">Male</option><option value="female">Female</option></select>
         </div>
-        <div class="input-group">
-            <label>Height (cm)</label>
-            <input type="number" id="height" placeholder="e.g. 170">
-        </div>
-        <div class="input-group">
-            <label>Body Mass (kg)</label>
-            <input type="number" id="weight" placeholder="e.g. 75">
-        </div>
+        <div class="input-group"><label>Height (cm)</label><input type="number" id="height"></div>
+        <div class="input-group"><label>Weight (kg)</label><input type="number" id="weight"></div>
     </div>
 
-    <h2>2. Test Scores</h2>
+    <h2>2. Test Results</h2>
     <div class="grid">
-        <div class="input-group">
-            <label>6MWT (Meters)</label>
-            <input type="number" id="mwt" placeholder="Distance">
-        </div>
-        <div class="input-group">
-            <label>STS (Reps)</label>
-            <input type="number" id="sts" placeholder="30s Reps">
-        </div>
-        <div class="input-group">
-            <label>TUG (Seconds)</label>
-            <input type="number" id="tug" step="0.1" placeholder="Time">
-        </div>
-        <div class="input-group">
-            <label>Grip Strength (kg)</label>
-            <input type="number" id="grip" placeholder="Max Grip">
-        </div>
+        <div class="input-group"><label>6MWT (m)</label><input type="number" id="mwt"></div>
+        <div class="input-group"><label>STS (Reps)</label><input type="number" id="sts"></div>
+        <div class="input-group"><label>TUG (sec)</label><input type="number" id="tug" step="0.1"></div>
+        <div class="input-group"><label>Grip (kg)</label><input type="number" id="grip"></div>
     </div>
 
-    <button onclick="calculateResults()">Compare</button>
+    <button onclick="calculateResults()">Generate Clinical Summary</button>
 
     <div id="results">
-        <h2>Clinical Summary</h2>
-        <div id="mwt-res" class="result-card"></div>
-        <div id="sts-res" class="result-card"></div>
-        <div id="tug-res" class="result-card"></div>
-        <div id="grip-res" class="result-card"></div>
+        <h2>Comparison Results</h2>
+        <div id="mwt-res"></div>
+        <div id="sts-res"></div>
+        <div id="tug-res"></div>
+        <div id="grip-res"></div>
+        
+        <div id="summary-output"></div>
+        
+        <p class="disclaimer">Note: Standards are derived from age-matched healthy population data. Clinical judgment is required for patients with chronic cardiac or respiratory conditions.</p>
     </div>
-
-    <footer>
-        No data is stored. Results are for clinical reference only.
-    </footer>
 </div>
 
 <script>
@@ -172,98 +91,86 @@
         const tugVal = parseFloat(document.getElementById('tug').value);
         const gripVal = parseFloat(document.getElementById('grip').value);
 
-        if(!age || !gender) { alert("Please enter at least Age and Gender"); return; }
-
+        if(!age || isNaN(age)) { alert("Please enter patient age."); return; }
         document.getElementById('results').style.display = 'block';
 
-        // --- 6MWT Logic ---
-        let mwtNorm = 0;
-        if(gender === 'male') {
-            mwtNorm = 489.22 - (4.33 * age) + (3.19 * h) - (2.18 * w);
-        } else {
-            mwtNorm = 498.06 - (4.80 * age) + (2.64 * h) - (1.24 * w);
-        }
-        displayResult('mwt-res', '6-Minute Walk Test', mwtVal, mwtNorm.toFixed(2), 'meters', true);
+        let findings = [];
 
-        // --- STS Logic ---
-        const stsNorm = getSTSNorm(age, gender);
-        displaySTSResult(stsVal, stsNorm);
+        // 1. 6MWT logic
+        let mwtNorm = (gender === 'male') 
+            ? 489.22 - (4.33 * age) + (3.19 * h) - (2.18 * w)
+            : 498.06 - (4.80 * age) + (2.64 * h) - (1.24 * w);
+        findings.push(processTest('mwt-res', '6-Minute Walk Test', mwtVal, mwtNorm.toFixed(0), 'm', true, "aerobic capacity"));
 
-        // --- TUG Logic ---
-        const tugNorm = getTUGNorm(age);
-        displayResult('tug-res', 'Timed Up and Go', tugVal, tugNorm, 'seconds', false); // lower is better
+        // 2. STS logic
+        const stsNormData = getSTSNorm(age, gender);
+        findings.push(processSTS(stsVal, stsNormData));
 
-        // --- Grip Logic ---
+        // 3. TUG logic (Lower is better)
+        const tugNorm = (age < 70) ? 8.1 : (age < 80) ? 9.2 : 11.3;
+        findings.push(processTest('tug-res', 'Timed Up and Go', tugVal, tugNorm, 's', false, "functional mobility"));
+
+        // 4. Grip logic
         const gripNorm = getGripNorm(age, gender);
-        displayResult('grip-res', 'Grip Strength', gripVal, gripNorm, 'kg', true);
+        findings.push(processTest('grip-res', 'Grip Strength', gripVal, gripNorm, 'kg', true, "upper limb strength"));
+
+        // Generate Clinical Narrative
+        const summaryBox = document.getElementById('summary-output');
+        const cleanFindings = findings.filter(f => f !== null);
+        summaryBox.innerHTML = `<strong>Clinical Interpretation:</strong><br>The patient demonstrates ${cleanFindings.join(', ')}.`;
     }
 
-    function displayResult(divId, title, val, norm, unit, higherIsBetter) {
-        if(isNaN(val)) return;
-        const pct = ((val / norm) * 100).toFixed(1);
-        let status = "";
-        let colorClass = "";
-        let tagClass = "";
+    function processTest(divId, title, val, norm, unit, higherIsBetter, label) {
+        if(isNaN(val)) { document.getElementById(divId).style.display = 'none'; return null; }
+        document.getElementById(divId).style.display = 'block';
+        
+        let pct = (val / norm) * 100;
+        let status = ""; let colorClass = ""; let tagClass = ""; let observation = "";
 
         if(higherIsBetter) {
-            if(pct < 90) { status = "Below Norm"; colorClass = "status-red"; tagClass = "bg-red"; }
-            else if(pct > 115) { status = "Above Norm"; colorClass = "status-blue"; tagClass = "bg-blue"; }
-            else { status = "In Norm"; colorClass = "status-green"; tagClass = "bg-green"; }
-        } else { // For TUG (lower is better)
-            if(val > norm * 1.1) { status = "Below Norm (Slow)"; colorClass = "status-red"; tagClass = "bg-red"; }
-            else if (val < norm * 0.9) { status = "Above Norm (Fast)"; colorClass = "status-blue"; tagClass = "bg-blue"; }
-            else { status = "In Norm"; colorClass = "status-green"; tagClass = "bg-green"; }
+            if(pct < 70) { status = "Significantly Below"; colorClass = "status-red"; tagClass = "bg-red"; observation = "reduced " + label; }
+            else if(pct < 85) { status = "Below Average"; colorClass = "status-yellow"; tagClass = "bg-yellow"; observation = "mildly limited " + label; }
+            else if(pct > 115) { status = "Above Average"; colorClass = "status-blue"; tagClass = "bg-blue"; observation = "preserved " + label; }
+            else { status = "Within Norms"; colorClass = "status-green"; tagClass = "bg-green"; observation = "expected " + label; }
+        } else { // TUG
+            if(val > norm * 1.3) { status = "Significantly Below"; colorClass = "status-red"; tagClass = "bg-red"; observation = "impaired " + label; }
+            else if(val > norm * 1.1) { status = "Below Average"; colorClass = "status-yellow"; tagClass = "bg-yellow"; observation = "mildly slow " + label; }
+            else { status = "Within Norms"; colorClass = "status-green"; tagClass = "bg-green"; observation = "normal " + label; }
         }
 
         document.getElementById(divId).className = `result-card ${colorClass}`;
-        document.getElementById(divId).innerHTML = `
-            <strong>${title}</strong><br>
-            Patient: ${val}${unit} | Predicted Norm: ${norm}${unit}<br>
-            <span class="tag ${tagClass}">${status} (${pct}%)</span>
-        `;
+        document.getElementById(divId).innerHTML = `<strong>${title}</strong><br>Patient: ${val}${unit} | Norm: ${norm}${unit}<br><span class="tag ${tagClass}">${status} (${pct.toFixed(1)}%)</span>`;
+        return observation;
+    }
+
+    function processSTS(val, norm) {
+        if(isNaN(val)) { document.getElementById('sts-res').style.display = 'none'; return null; }
+        document.getElementById('sts-res').style.display = 'block';
+        let status = "Average"; let color = "status-green"; let bg = "bg-green"; let obs = "functional lower limb strength";
+        
+        if(val < norm.b) { status = "Below Average"; color = "status-red"; bg = "bg-red"; obs = "lower limb strength deficits"; }
+        else if(val > norm.av) { status = "Above Average"; color = "status-blue"; bg = "bg-blue"; obs = "excellent lower limb strength"; }
+
+        document.getElementById('sts-res').className = `result-card ${color}`;
+        document.getElementById('sts-res').innerHTML = `<strong>STS (30s)</strong><br>Patient: ${val} reps | Norm: ${norm.b}-${norm.av} reps<br><span class="tag ${bg}">${status}</span>`;
+        return obs;
     }
 
     function getSTSNorm(age, gender) {
         const data = {
-            female: [
-                {a: 64, b: 12, av: 17}, {a: 69, b: 11, av: 16}, {a: 74, b: 10, av: 15}, 
-                {a: 79, b: 10, av: 15}, {a: 84, b: 9, av: 14}, {a: 89, b: 8, av: 13}, {a: 94, b: 4, av: 11}
-            ],
-            male: [
-                {a: 64, b: 14, av: 19}, {a: 69, b: 12, av: 18}, {a: 74, b: 12, av: 17}, 
-                {a: 79, b: 11, av: 17}, {a: 84, b: 10, av: 15}, {a: 89, b: 8, av: 14}, {a: 94, b: 7, av: 12}
-            ]
+            female: [{a:64,b:12,av:17},{a:69,b:11,av:16},{a:74,b:10,av:15},{a:79,b:10,av:15},{a:84,b:9,av:14},{a:89,b:8,av:13},{a:200,b:4,av:11}],
+            male: [{a:64,b:14,av:19},{a:69,b:12,av:18},{a:74,b:12,av:17},{a:79,b:11,av:17},{a:84,b:10,av:15},{a:89,b:8,av:14},{a:200,b:7,av:12}]
         };
-        return data[gender].find(r => age <= r.a) || data[gender][6];
-    }
-
-    function displaySTSResult(val, norm) {
-        if(isNaN(val)) return;
-        let status = "Average"; let color = "status-green"; let bg = "bg-green";
-        if(val < norm.b) { status = "Below Average"; color = "status-red"; bg = "bg-red"; }
-        else if(val > norm.av) { status = "Above Average"; color = "status-blue"; bg = "bg-blue"; }
-
-        document.getElementById('sts-res').className = `result-card ${color}`;
-        document.getElementById('sts-res').innerHTML = `
-            <strong>Sit to Stand (30s)</strong><br>
-            Patient: ${val} reps | Norm: ${norm.b}-${norm.av} reps<br>
-            <span class="tag ${bg}">${status}</span>
-        `;
-    }
-
-    function getTUGNorm(age) {
-        if(age < 70) return 8.1;
-        if(age < 80) return 9.2;
-        return 11.3;
+        return data[gender].find(r => age <= r.a);
     }
 
     function getGripNorm(age, gender) {
         const gripData = {
-            male: {24:48.0, 29:49.3, 34:49.7, 39:49.5, 44:48.8, 49:47.6, 54:46.2, 59:44.4, 64:42.4, 69:40.1, 74:37.7, 79:35.1, 84:32.3, 89:29.4, 94:26.3, 99:23.1, 100:19.8},
-            female: {24:28.6, 29:29.4, 34:29.7, 39:29.7, 44:29.4, 49:28.9, 54:28.2, 59:27.3, 64:26.2, 69:25.0, 74:23.6, 79:22.1, 84:20.4, 89:18.6, 94:16.7, 99:14.6, 100:12.4}
+            male: {24:48,29:49.3,34:49.7,39:49.5,44:48.8,49:47.6,54:46.2,59:44.4,64:42.4,69:40.1,74:37.7,79:35.1,84:32.3,89:29.4,94:26.3,99:23.1,200:19.8},
+            female: {24:28.6,29:29.4,34:29.7,39:29.7,44:29.4,49:28.9,54:28.2,59:27.3,64:26.2,69:25.0,74:23.6,79:22.1,84:20.4,89:18.6,94:16.7,99:14.6,200:12.4}
         };
         const keys = Object.keys(gripData[gender]).map(Number);
-        const closestAge = keys.find(k => age <= k) || 100;
+        const closestAge = keys.find(k => age <= k);
         return gripData[gender][closestAge];
     }
 </script>
