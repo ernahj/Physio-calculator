@@ -3,218 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhysioStats | Clinical Comparison Pro</title>
+    <title>Physio Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2c3e50;
-            --below: #e74c3c;
-            --warning: #f39c12;
-            --norm: #27ae60;
-            --above: #2980b9;
-            --bg: #f4f7f6;
+            --ink: #17323a;
+            --muted: #62777e;
+            --line: #d5e2e3;
+            --bg: #eef4f4;
+            --surface: #ffffff;
+            --accent: #1f7a7a;
+            --accent-dark: #17595c;
+
+            --below: #e07a6f;
+            --low: #f0b94d;
+            --norm: #5fb48c;
+            --above: #4a8fc4;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--primary); padding: 15px; margin: 0; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        
-        h1 { text-align: center; font-size: 1.8rem; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 25px; font-size: 0.9rem; }
+        * { box-sizing: border-box; }
 
-        .section-title { background: #ecf0f1; padding: 8px 15px; border-radius: 6px; font-size: 1.1rem; margin: 20px 0 15px 0; border-left: 5px solid var(--primary); }
-
-        .input-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; align-items: center; margin-bottom: 10px; }
-        .header-label { font-weight: bold; font-size: 0.8rem; color: #7f8c8d; text-transform: uppercase; }
-
-        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; }
-        
-        .button-group { display: grid; grid-template-columns: 3fr 1fr; gap: 10px; margin-top: 25px; }
-        .btn-calc { padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; }
-        .btn-clear { padding: 15px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; }
-
-        #results { margin-top: 30px; display: none; }
-        .result-card { padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 10px solid #ccc; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        
-        .status-red { border-left-color: var(--below); }
-        .status-yellow { border-left-color: var(--warning); }
-        .status-green { border-left-color: var(--norm); }
-        .status-blue { border-left-color: var(--above); }
-
-        .diff-text { font-weight: bold; font-size: 0.9rem; margin-top: 5px; display: block; }
-        .improvement { color: var(--norm); }
-        .decline { color: var(--below); }
-        .sig-badge { background: #34495e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px; vertical-align: middle; }
-
-        #summary-output { margin-top: 20px; padding: 20px; background: #eef2f3; border-radius: 8px; line-height: 1.6; border: 1px solid #d1d8dd; }
-        .tag { display: inline-block; padding: 3px 8px; border-radius: 4px; color: white; font-size: 0.75rem; font-weight: bold; margin-top: 5px; }
-        .disclaimer { font-size: 0.75rem; color: #777; margin-top: 25px; font-style: italic; border-top: 1px solid #eee; padding-top: 10px; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>PhysioStats Clinical</h1>
-    <div class="subtitle">Advanced Assessment & Comparison Tool</div>
-    
-    <div class="section-title">1. Patient Profile</div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-        <div><label>Age</label><input type="number" id="age" placeholder="Years"></div>
-        <div><label>Gender</label><select id="gender"><option value="male">Male</option><option value="female">Female</option></select></div>
-        <div><label>Height (cm)</label><input type="number" id="height" placeholder="cm"></div>
-        <div><label>Weight (kg)</label><input type="number" id="weight" placeholder="kg"></div>
-    </div>
-
-    <div class="section-title">2. Assessment Data</div>
-    <div class="input-grid">
-        <span></span>
-        <span class="header-label">Current Session</span>
-        <span class="header-label">Previous (Opt)</span>
-    </div>
-
-    <div class="input-grid">
-        <label>6MWT (meters)</label>
-        <input type="number" id="mwt_curr">
-        <input type="number" id="mwt_prev">
-    </div>
-
-    <div class="input-grid">
-        <label>STS (reps)</label>
-        <input type="number" id="sts_curr">
-        <input type="number" id="sts_prev">
-    </div>
-
-    <div class="input-grid">
-        <label>TUG (seconds)</label>
-        <input type="number" id="tug_curr" step="0.1">
-        <input type="number" id="tug_prev" step="0.1">
-    </div>
-
-    <div class="input-grid">
-        <label>Grip Strength (kg)</label>
-        <input type="number" id="grip_curr">
-        <input type="number" id="grip_prev">
-    </div>
-
-    <div class="input-grid">
-        <label>Ergometry (METs)</label>
-        <input type="number" id="mets_curr" step="0.1">
-        <input type="number" id="mets_prev" step="0.1">
-    </div>
-
-    <div class="button-group">
-        <button class="btn-calc" onclick="calculate()">Calculate & Compare</button>
-        <button class="btn-clear" onclick="clearAll()">Clear</button>
-    </div>
-
-    <div id="results">
-        <div id="summary-output"></div>
-        <div id="cards-container"></div>
-        <p class="disclaimer"><strong>Clinical Disclaimer:</strong> All comparisons are made against age and gender-matched healthy population norms. For patients with chronic respiratory or cardiac conditions, these results should be used to track longitudinal progress rather than as absolute diagnostic criteria. Individual MCID (Minimal Clinically Important Difference) values are applied to progress assessments.</p>
-    </div>
-</div>
-
-<script>
-    function clearAll() {
-        const inputs = document.querySelectorAll('input');
-        inputs.forEach(input => input.value = '');
-        document.getElementById('results').style.display = 'none';
-    }
-
-    // Thresholds for Clinical Significance (MCID)
-    const MCID = { mwt: 30, sts: 2, tug: 1.5, grip: 5, mets: 0.5 };
-
-    function calculate() {
-        const age = parseInt(document.getElementById('age').value);
-        const gender = document.getElementById('gender').value;
-        const h = parseFloat(document.getElementById('height').value);
-        const w = parseFloat(document.getElementById('weight').value);
-
-        if(!age || isNaN(age)) { alert("Please enter patient age."); return; }
-
-        document.getElementById('results').style.display = 'block';
-        const container = document.getElementById('cards-container');
-        container.innerHTML = '';
-        let clinicalFindings = [];
-        let progressFindings = [];
-
-        const mwtNorm = (gender === 'male') ? 489.22 - (4.33 * age) + (3.19 * h) - (2.18 * w) : 498.06 - (4.80 * age) + (2.64 * h) - (1.24 * w);
-        const metsNorm = 14.7 - (0.11 * age);
-        const tugNorm = (age < 70) ? 8.1 : (age < 80) ? 9.2 : 11.3;
-        
-        processTest(container, "6-Minute Walk Test", "mwt_curr", "mwt_prev", mwtNorm, "m", true, "aerobic capacity", "6MWT", MCID.mwt, clinicalFindings, progressFindings);
-        const stsNormData = getSTSNorm(age, gender);
-        processTest(container, "Sit to Stand (30s)", "sts_curr", "sts_prev", stsNormData.av, " reps", true, "lower limb strength", "STS", MCID.sts, clinicalFindings, progressFindings);
-        processTest(container, "Timed Up and Go", "tug_curr", "tug_prev", tugNorm, "s", false, "functional mobility", "TUG", MCID.tug, clinicalFindings, progressFindings);
-        const gripNorm = getGripNorm(age, gender);
-        processTest(container, "Grip Strength", "grip_curr", "grip_prev", gripNorm, "kg", true, "upper limb strength", "Grip", MCID.grip, clinicalFindings, progressFindings);
-        processTest(container, "Ergometry (METs)", "mets_curr", "mets_prev", metsNorm, " METs", true, "exercise tolerance", "METs", MCID.mets, clinicalFindings, progressFindings);
-
-        const summaryBox = document.getElementById('summary-output');
-        let narrative = `<strong>Baseline Status:</strong> The patient demonstrates ${clinicalFindings.join(', ')}.`;
-        if(progressFindings.length > 0) {
-            narrative += `<br><br><strong>Progress Report:</strong> Since the previous assessment, the patient has shown ${progressFindings.join(', ')}.`;
+        body {
+            font-family: 'Figtree', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--ink);
+            padding: 15px;
+            margin: 0;
+            line-height: 1.45;
         }
-        summaryBox.innerHTML = narrative;
-    }
-
-    function processTest(target, title, currId, prevId, norm, unit, higherIsBetter, label, testName, mcidVal, clinicalArr, progressArr) {
-        const curr = parseFloat(document.getElementById(currId).value);
-        const prev = parseFloat(document.getElementById(prevId).value);
-        if(isNaN(curr)) return;
-
-        let pct = (curr / norm) * 100;
-        let status = ""; let color = ""; let obs = "";
-
-        if(higherIsBetter) {
-            if(pct < 70) { status = "Significantly Below"; color = "status-red"; obs = `reduced ${label} (${testName})`; }
-            else if(pct < 85) { status = "Below Average"; color = "status-yellow"; obs = `mildly limited ${label} (${testName})`; }
-            else { status = "Within Norms"; color = "status-green"; obs = `preserved ${label} (${testName})`; }
-        } else {
-            if(curr > norm * 1.3) { status = "Significantly Below"; color = "status-red"; obs = `impaired ${label} (${testName})`; }
-            else { status = "Within Norms"; color = "status-green"; obs = `normal ${label} (${testName})`; }
-        }
-        clinicalArr.push(obs);
-
-        let diffHtml = "";
-        if(!isNaN(prev)) {
-            const diff = curr - prev;
-            const absDiff = Math.abs(diff);
-            const isImprovement = higherIsBetter ? diff > 0 : diff < 0;
-            const isSignificant = absDiff >= mcidVal;
-            const sigBadge = isSignificant ? `<span class="sig-badge">SIGNIFICANT</span>` : "";
-            
-            const classType = isImprovement ? "improvement" : "decline";
-            const trendWord = isImprovement ? "improvement" : "decline";
-            
-            diffHtml = `<span class="diff-text ${classType}">${diff > 0 ? '+' : ''}${diff.toFixed(1)}${unit} change (${trendWord})${sigBadge}</span>`;
-            
-            let sigText = isSignificant ? "a significant " : "a ";
-            progressArr.push(`${sigText}${trendWord} in ${label} [${testName}] (${diff > 0 ? '+' : ''}${diff.toFixed(1)}${unit})`);
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--surface);
+            padding: 28px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
         }
 
-        const card = document.createElement('div');
-        card.className = `result-card ${color}`;
-        card.innerHTML = `<strong>${title}</strong><br>Current: ${curr}${unit} | Norm: ${norm.toFixed(1)}${unit}<br><span class="tag ${color.replace('status', 'bg')}">${status} (${pct.toFixed(0)}%)</span>${diffHtml}`;
-        target.appendChild(card);
-    }
+        h1 { text-align: center; font-size: 2rem; font-weight: 700; margin: 0 0 4px 0; letter-spacing: -0.01em; }
+        .subtitle { text-align: center; color: var(--muted); margin-bottom: 26px; font-size: 1rem; }
 
-    function getSTSNorm(age, gender) {
-        const data = {
-            female: [{a:64,b:12,av:17},{a:69,b:11,av:16},{a:74,b:10,av:15},{a:79,b:10,av:15},{a:84,b:9,av:14},{a:89,b:8,av:13},{a:200,b:4,av:11}],
-            male: [{a:64,b:14,av:19},{a:69,b:12,av:18},{a:74,b:12,av:17},{a:79,b:11,av:17},{a:84,b:10,av:15},{a:89,b:8,av:14},{a:200,b:7,av:12}]
-        };
-        return data[gender].find(r => age <= r.a);
-    }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 24px 0 14px 0;
+            padding-left: 12px;
+            border-left: 4px solid var(--accent);
+        }
 
-    function getGripNorm(age, gender) {
-        const gripData = {
-            male: {24:48,29:49.3,34:49.7,39:49.5,44:48.8,49:47.6,54:46.2,59:44.4,64:42.4,69:40.1,74:37.7,79:35.1,84:32.3,89:29.4,94:26.3,99:23.1,200:19.8},
-            female: {24:28.6,29:29.4,34:29.7,39:29.7,44:29.4,49:28.9,54:28.2,59:27.3,64:26.2,69:25.0,74:23.6,79:22.1,84:20.4,89:18.6,94:16.7,99:14.6,200:12.4}
-        };
-        const keys = Object.keys(gripData[gender]).map(Number);
-        const closestAge = keys.find(k => age <= k);
-        return gripData[gender][closestAge];
-    }
-</script>
+        label { font-weight: 500; font-size: 0.95rem; display: block; margin-bottom: 5px; }
 
-</body>
-</html>
+        .input-grid { display: grid; grid-template-columns: 2fr 1fr 1fr
