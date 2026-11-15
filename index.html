@@ -124,16 +124,43 @@
 
         .disclaimer { font-size: 0.8rem; color: var(--muted); margin-top: 24px; border-top: 1px solid var(--line); padding-top: 12px; }
 
-        /* ---------- Print / PDF ---------- */
-        @page { margin: 14mm; }
+        /* ---------- Print / PDF: compact, fits on one A4 page ---------- */
+        @page { size: A4 portrait; margin: 10mm; }
         @media print {
-            body { background: #fff; padding: 0; }
-            .container { border: none; padding: 0; max-width: none; }
+            html, body { height: auto; }
+            body { background: #fff; padding: 0; line-height: 1.3; }
+            .container { border: none; padding: 0; max-width: none; border-radius: 0; }
             .no-print { display: none !important; }
-            .report-header { display: block; }
+
+            h1 { font-size: 1.3rem; margin: 0 0 4px 0; }
+            .report-header { display: block; font-size: 0.78rem; margin-bottom: 4px; padding-bottom: 6px; }
+            .report-header span { margin-right: 12px; }
             #results { margin-top: 0; }
-            .result-card, .results-heading { break-inside: avoid; page-break-inside: avoid; }
-            .results-heading { break-after: avoid; }
+
+            .results-heading { font-size: 0.9rem; margin: 8px 0 5px 0; padding-left: 8px; border-left-width: 3px; break-after: avoid; }
+
+            /* Two columns of cards */
+            .cards-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+            .result-card { margin: 0; padding: 6px 8px; border-left-width: 5px; border-radius: 6px; break-inside: avoid; page-break-inside: avoid; }
+
+            .card-head { gap: 6px; flex-wrap: nowrap; }
+            .card-title { font-size: 0.82rem; }
+            .tag { font-size: 0.62rem; padding: 1px 7px; }
+
+            .card-body { flex-wrap: nowrap; gap: 8px; margin-top: 4px; }
+            .gauge { flex: 0 0 38%; margin: 0; }
+            .legend { font-size: 0.5rem; gap: 1px 5px; margin-top: 0; }
+            .dot { width: 6px; height: 6px; margin-right: 2px; }
+            .info { flex: 1 1 auto; min-width: 0; }
+            .big-value { font-size: 1.05rem; }
+            .norm-line { font-size: 0.66rem; margin-top: 2px; }
+            .est-note { font-size: 0.58rem; }
+            .note { font-size: 0.6rem; margin-top: 2px; }
+            .diff-text { font-size: 0.66rem; margin-top: 3px; }
+            .sig-badge { font-size: 0.55rem; padding: 1px 5px; margin-left: 3px; }
+
+            .disclaimer { font-size: 0.56rem; margin-top: 8px; padding-top: 5px; line-height: 1.3; }
+
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
@@ -420,6 +447,7 @@
 
         // ---- Functional tests ----
         const functionalCards = document.createElement('div');
+        functionalCards.className = 'cards-wrap';
 
         // 6MWT: predicted distance, norm range = reference +/- estimated spread
         if (!isNaN(mwt.curr)) {
@@ -477,6 +505,7 @@
 
         // ---- Body composition ----
         const bodyCards = document.createElement('div');
+        bodyCards.className = 'cards-wrap';
         let bodyCount = 0;
 
         // Visceral fat level: norm 1-9, lower is better
