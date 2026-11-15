@@ -42,8 +42,7 @@
             border: 1px solid var(--line);
         }
 
-        h1 { text-align: center; font-size: 2rem; font-weight: 700; margin: 0 0 4px 0; letter-spacing: -0.01em; }
-        .subtitle { text-align: center; color: var(--muted); margin-bottom: 26px; font-size: 1rem; }
+        h1 { text-align: center; font-size: 2rem; font-weight: 700; margin: 0 0 22px 0; letter-spacing: -0.01em; }
 
         .section-title {
             font-size: 1.1rem;
@@ -77,14 +76,19 @@
         }
 
         .button-group { display: grid; grid-template-columns: 3fr 1fr; gap: 10px; margin-top: 26px; }
-        .btn-calc, .btn-clear { font-family: inherit; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-size: 1.05rem; font-weight: 600; color: white; }
+        .btn-calc, .btn-clear, .btn-pdf { font-family: inherit; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-size: 1.05rem; font-weight: 600; color: white; }
         .btn-calc { background: var(--accent); }
         .btn-calc:hover { background: var(--accent-dark); }
         .btn-clear { background: #8fa3a8; }
         .btn-clear:hover { background: #768b91; }
+        .btn-pdf { background: var(--ink); width: 100%; }
+        .btn-pdf:hover { background: #0f2227; }
 
         #results { margin-top: 30px; display: none; }
         .results-heading { font-size: 1.1rem; font-weight: 600; margin: 22px 0 12px 0; padding-left: 12px; border-left: 4px solid var(--accent); }
+
+        .report-header { display: none; margin-bottom: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+        .report-header span { margin-right: 18px; white-space: nowrap; }
 
         .result-card { padding: 16px 18px; margin-bottom: 14px; border-radius: 10px; border: 1px solid var(--line); border-left: 8px solid #ccc; background: #fff; }
         .status-red { border-left-color: var(--below); }
@@ -119,102 +123,118 @@
         .sig-badge { background: var(--ink); color: white; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; margin-left: 6px; vertical-align: middle; }
 
         .disclaimer { font-size: 0.8rem; color: var(--muted); margin-top: 24px; border-top: 1px solid var(--line); padding-top: 12px; }
+
+        /* ---------- Print / PDF ---------- */
+        @page { margin: 14mm; }
+        @media print {
+            body { background: #fff; padding: 0; }
+            .container { border: none; padding: 0; max-width: none; }
+            .no-print { display: none !important; }
+            .report-header { display: block; }
+            #results { margin-top: 0; }
+            .result-card, .results-heading { break-inside: avoid; page-break-inside: avoid; }
+            .results-heading { break-after: avoid; }
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Physio Calculator</h1>
-    <div class="subtitle">Assessment and comparison tool</div>
 
-    <div class="section-title">1. Patient profile</div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-        <div><label for="age">Age</label><input type="number" id="age" placeholder="Years"></div>
-        <div><label for="gender">Gender</label><select id="gender"><option value="male">Male</option><option value="female">Female</option></select></div>
-        <div><label for="height">Height (cm)</label><input type="number" id="height" placeholder="cm"></div>
-        <div><label for="weight">Weight (kg)</label><input type="number" id="weight" placeholder="kg"></div>
-    </div>
+    <div id="input-area" class="no-print">
+        <div class="section-title">1. Patient profile</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+            <div><label for="age">Age</label><input type="number" id="age" placeholder="Years"></div>
+            <div><label for="gender">Gender</label><select id="gender"><option value="male">Male</option><option value="female">Female</option></select></div>
+            <div><label for="height">Height (cm)</label><input type="number" id="height" placeholder="cm"></div>
+            <div><label for="weight">Weight (kg)</label><input type="number" id="weight" placeholder="kg"></div>
+        </div>
 
-    <div class="section-title">2. Assessment data</div>
-    <div class="input-grid">
-        <span></span>
-        <span class="header-label">Current session</span>
-        <span class="header-label">Previous (optional)</span>
-    </div>
+        <div class="section-title">2. Assessment data</div>
+        <div class="input-grid">
+            <span></span>
+            <span class="header-label">Current session</span>
+            <span class="header-label">Previous (optional)</span>
+        </div>
 
-    <div class="input-grid">
-        <label for="mwt_curr">6MWT (meters)</label>
-        <input type="number" id="mwt_curr">
-        <input type="number" id="mwt_prev" aria-label="6MWT previous">
-    </div>
+        <div class="input-grid">
+            <label for="mwt_curr">6MWT (meters)</label>
+            <input type="number" id="mwt_curr">
+            <input type="number" id="mwt_prev" aria-label="6MWT previous">
+        </div>
 
-    <div class="input-grid">
-        <label for="sts_curr">STS (reps)</label>
-        <input type="number" id="sts_curr">
-        <input type="number" id="sts_prev" aria-label="STS previous">
-    </div>
+        <div class="input-grid">
+            <label for="sts_curr">STS (reps)</label>
+            <input type="number" id="sts_curr">
+            <input type="number" id="sts_prev" aria-label="STS previous">
+        </div>
 
-    <div class="input-grid">
-        <label for="tug_curr">TUG (seconds)</label>
-        <input type="number" id="tug_curr" step="0.1">
-        <input type="number" id="tug_prev" step="0.1" aria-label="TUG previous">
-    </div>
+        <div class="input-grid">
+            <label for="tug_curr">TUG (seconds)</label>
+            <input type="number" id="tug_curr" step="0.1">
+            <input type="number" id="tug_prev" step="0.1" aria-label="TUG previous">
+        </div>
 
-    <div class="input-grid">
-        <label for="grip_curr">Grip strength (kg)</label>
-        <input type="number" id="grip_curr">
-        <input type="number" id="grip_prev" aria-label="Grip strength previous">
-    </div>
+        <div class="input-grid">
+            <label for="grip_curr">Grip strength (kg)</label>
+            <input type="number" id="grip_curr">
+            <input type="number" id="grip_prev" aria-label="Grip strength previous">
+        </div>
 
-    <div class="input-grid">
-        <label for="mets_curr">Ergometry (METs)</label>
-        <input type="number" id="mets_curr" step="0.1">
-        <input type="number" id="mets_prev" step="0.1" aria-label="Ergometry previous">
-    </div>
+        <div class="input-grid">
+            <label for="mets_curr">Ergometry (METs)</label>
+            <input type="number" id="mets_curr" step="0.1">
+            <input type="number" id="mets_prev" step="0.1" aria-label="Ergometry previous">
+        </div>
 
-    <div class="section-title">3. Body composition</div>
-    <div class="input-grid">
-        <span></span>
-        <span class="header-label">Current session</span>
-        <span class="header-label">Previous (optional)</span>
-    </div>
+        <div class="section-title">3. Body composition</div>
+        <div class="input-grid">
+            <span></span>
+            <span class="header-label">Current session</span>
+            <span class="header-label">Previous (optional)</span>
+        </div>
 
-    <div class="input-grid">
-        <label for="vf_curr">Visceral fat level</label>
-        <input type="number" id="vf_curr" step="1">
-        <input type="number" id="vf_prev" step="1" aria-label="Visceral fat level previous">
-    </div>
+        <div class="input-grid">
+            <label for="vf_curr">Visceral fat level</label>
+            <input type="number" id="vf_curr" step="1">
+            <input type="number" id="vf_prev" step="1" aria-label="Visceral fat level previous">
+        </div>
 
-    <div class="input-grid">
-        <label for="smi_curr">SMI (kg/m²)</label>
-        <input type="number" id="smi_curr" step="0.1">
-        <input type="number" id="smi_prev" step="0.1" aria-label="SMI previous">
-    </div>
+        <div class="input-grid">
+            <label for="smi_curr">SMI (kg/m²)</label>
+            <input type="number" id="smi_curr" step="0.1">
+            <input type="number" id="smi_prev" step="0.1" aria-label="SMI previous">
+        </div>
 
-    <div class="input-grid">
-        <label for="smmw_curr">SMM/W (%)</label>
-        <input type="number" id="smmw_curr" step="0.1">
-        <input type="number" id="smmw_prev" step="0.1" aria-label="SMM/W previous">
-    </div>
+        <div class="input-grid">
+            <label for="smmw_curr">SMM/W (%)</label>
+            <input type="number" id="smmw_curr" step="0.1">
+            <input type="number" id="smmw_prev" step="0.1" aria-label="SMM/W previous">
+        </div>
 
-    <div class="input-grid">
-        <label for="pbf_curr">PBF (%)</label>
-        <input type="number" id="pbf_curr" step="0.1">
-        <input type="number" id="pbf_prev" step="0.1" aria-label="PBF previous">
-    </div>
+        <div class="input-grid">
+            <label for="pbf_curr">PBF (%)</label>
+            <input type="number" id="pbf_curr" step="0.1">
+            <input type="number" id="pbf_prev" step="0.1" aria-label="PBF previous">
+        </div>
 
-    <div class="input-grid">
-        <label for="pa_curr">Phase angle (°)</label>
-        <input type="number" id="pa_curr" step="0.1">
-        <input type="number" id="pa_prev" step="0.1" aria-label="Phase angle previous">
-    </div>
+        <div class="input-grid">
+            <label for="pa_curr">Phase angle (°)</label>
+            <input type="number" id="pa_curr" step="0.1">
+            <input type="number" id="pa_prev" step="0.1" aria-label="Phase angle previous">
+        </div>
 
-    <div class="button-group">
-        <button class="btn-calc" onclick="calculate()">Calculate and compare</button>
-        <button class="btn-clear" onclick="clearAll()">Clear</button>
+        <div class="button-group">
+            <button class="btn-calc" onclick="calculate()">Calculate and compare</button>
+            <button class="btn-clear" onclick="clearAll()">Clear</button>
+        </div>
     </div>
 
     <div id="results">
+        <button class="btn-pdf no-print" onclick="printReport()">Save, share or print as PDF</button>
+        <div id="report-header" class="report-header"></div>
         <div id="cards-container"></div>
         <p class="disclaimer"><strong>Clinical disclaimer:</strong> All comparisons are made against age and gender-matched healthy population norms. For the sit-to-stand test, the norm range is the published normal range (ages 60 and over) or the reference mean plus or minus 1 SD (ages 20 to 59). For the 6MWT, TUG, grip strength and ergometry, the norm range is the reference value plus or minus an estimated typical variation. For patients with chronic respiratory or cardiac conditions, these results should be used to track longitudinal progress rather than as absolute diagnostic criteria. Individual MCID (Minimal Clinically Important Difference) values are applied to progress assessments of the functional tests.</p>
     </div>
@@ -225,6 +245,16 @@
         const inputs = document.querySelectorAll('input');
         inputs.forEach(input => input.value = '');
         document.getElementById('results').style.display = 'none';
+    }
+
+    // Opens the print dialog: choose "Save as PDF", share, or print
+    function printReport() {
+        const oldTitle = document.title;
+        const d = new Date();
+        const stamp = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        document.title = 'Physio-Calculator-results-' + stamp;
+        window.print();
+        setTimeout(() => { document.title = oldTitle; }, 1000);
     }
 
     // Thresholds for Clinical Significance (MCID)
@@ -379,6 +409,14 @@
         document.getElementById('results').style.display = 'block';
         const container = document.getElementById('cards-container');
         container.innerHTML = '';
+
+        // Header shown on the PDF / printout
+        let headerHtml = `<span><strong>Date:</strong> ${new Date().toLocaleDateString()}</span>`;
+        headerHtml += `<span><strong>Age:</strong> ${age}</span>`;
+        headerHtml += `<span><strong>Gender:</strong> ${gender === 'male' ? 'Male' : 'Female'}</span>`;
+        if (!isNaN(h)) headerHtml += `<span><strong>Height:</strong> ${h} cm</span>`;
+        if (!isNaN(w)) headerHtml += `<span><strong>Weight:</strong> ${w} kg</span>`;
+        document.getElementById('report-header').innerHTML = headerHtml;
 
         // ---- Functional tests ----
         const functionalCards = document.createElement('div');
