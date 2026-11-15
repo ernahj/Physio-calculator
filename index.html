@@ -84,6 +84,7 @@
         .btn-clear:hover { background: #768b91; }
 
         #results { margin-top: 30px; display: none; }
+        .results-heading { font-size: 1.1rem; font-weight: 600; margin: 22px 0 12px 0; padding-left: 12px; border-left: 4px solid var(--accent); }
 
         .result-card { padding: 16px 18px; margin-bottom: 14px; border-radius: 10px; border: 1px solid var(--line); border-left: 8px solid #ccc; background: #fff; }
         .status-red { border-left-color: var(--below); }
@@ -93,7 +94,6 @@
 
         .card-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
         .card-title { font-weight: 700; font-size: 1.1rem; }
-        .values { color: var(--muted); font-size: 0.92rem; margin-top: 4px; }
 
         .tag { display: inline-block; padding: 3px 10px; border-radius: 999px; color: white; font-size: 0.8rem; font-weight: 600; }
         .bg-red { background: var(--below); }
@@ -101,24 +101,16 @@
         .bg-green { background: var(--norm); color: #0f3a27; }
         .bg-blue { background: var(--above); }
 
-        /* Percentile bar: the position along the bar equals the percentile */
-        .pbar-wrap { position: relative; margin: 20px 4px 6px 4px; }
-        .pbar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; }
-        .pbar span { display: block; height: 100%; }
-        .z-red { background: var(--below); width: 5%; }
-        .z-yellow { background: var(--low); width: 20%; }
-        .z-green { background: var(--norm); width: 50%; }
-        .z-blue { background: var(--above); width: 25%; }
-        .marker {
-            position: absolute; top: -5px; width: 24px; height: 24px; margin-left: -12px;
-            border-radius: 50%; background: var(--ink); border: 3px solid white;
-            box-shadow: 0 0 0 1px var(--ink);
-        }
-        .pscale { position: relative; height: 18px; margin: 0 4px; font-size: 0.75rem; color: var(--muted); }
-        .pscale span { position: absolute; transform: translateX(-50%); }
-
-        .ptext { margin-top: 6px; font-weight: 600; }
-        .est-note { font-weight: 400; font-size: 0.8rem; color: var(--muted); }
+        .card-body { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; margin-top: 8px; }
+        .gauge { flex: 0 0 230px; max-width: 100%; margin: 0 auto; }
+        .gauge svg { width: 100%; height: auto; display: block; }
+        .legend { display: flex; justify-content: center; gap: 4px 12px; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+        .legend .active { color: var(--ink); font-weight: 700; }
+        .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
+        .info { flex: 1 1 200px; }
+        .big-value { font-size: 1.7rem; font-weight: 700; line-height: 1.1; }
+        .norm-line { color: var(--muted); font-size: 0.92rem; margin-top: 4px; }
+        .est-note { font-size: 0.8rem; color: var(--muted); }
         .note { font-size: 0.82rem; color: var(--muted); margin-top: 6px; }
 
         .diff-text { font-weight: 600; font-size: 0.92rem; margin-top: 10px; display: block; }
@@ -180,6 +172,43 @@
         <input type="number" id="mets_prev" step="0.1" aria-label="Ergometry previous">
     </div>
 
+    <div class="section-title">3. Body composition</div>
+    <div class="input-grid">
+        <span></span>
+        <span class="header-label">Current session</span>
+        <span class="header-label">Previous (optional)</span>
+    </div>
+
+    <div class="input-grid">
+        <label for="vf_curr">Visceral fat level</label>
+        <input type="number" id="vf_curr" step="1">
+        <input type="number" id="vf_prev" step="1" aria-label="Visceral fat level previous">
+    </div>
+
+    <div class="input-grid">
+        <label for="smi_curr">SMI (kg/m²)</label>
+        <input type="number" id="smi_curr" step="0.1">
+        <input type="number" id="smi_prev" step="0.1" aria-label="SMI previous">
+    </div>
+
+    <div class="input-grid">
+        <label for="smmw_curr">SMM/W (%)</label>
+        <input type="number" id="smmw_curr" step="0.1">
+        <input type="number" id="smmw_prev" step="0.1" aria-label="SMM/W previous">
+    </div>
+
+    <div class="input-grid">
+        <label for="pbf_curr">PBF (%)</label>
+        <input type="number" id="pbf_curr" step="0.1">
+        <input type="number" id="pbf_prev" step="0.1" aria-label="PBF previous">
+    </div>
+
+    <div class="input-grid">
+        <label for="pa_curr">Phase angle (°)</label>
+        <input type="number" id="pa_curr" step="0.1">
+        <input type="number" id="pa_prev" step="0.1" aria-label="Phase angle previous">
+    </div>
+
     <div class="button-group">
         <button class="btn-calc" onclick="calculate()">Calculate and compare</button>
         <button class="btn-clear" onclick="clearAll()">Clear</button>
@@ -187,7 +216,7 @@
 
     <div id="results">
         <div id="cards-container"></div>
-        <p class="disclaimer"><strong>Clinical disclaimer:</strong> All comparisons are made against age and gender-matched healthy population norms. Percentiles are estimates that assume a bell-shaped distribution around the reference value. For patients with chronic respiratory or cardiac conditions, these results should be used to track longitudinal progress rather than as absolute diagnostic criteria. Individual MCID (Minimal Clinically Important Difference) values are applied to progress assessments.</p>
+        <p class="disclaimer"><strong>Clinical disclaimer:</strong> All comparisons are made against age and gender-matched healthy population norms. For the sit-to-stand test, the norm range is the published normal range (ages 60 and over) or the reference mean plus or minus 1 SD (ages 20 to 59). For the 6MWT, TUG, grip strength and ergometry, the norm range is the reference value plus or minus an estimated typical variation. For patients with chronic respiratory or cardiac conditions, these results should be used to track longitudinal progress rather than as absolute diagnostic criteria. Individual MCID (Minimal Clinically Important Difference) values are applied to progress assessments of the functional tests.</p>
     </div>
 </div>
 
@@ -201,26 +230,141 @@
     // Thresholds for Clinical Significance (MCID)
     const MCID = { mwt: 30, sts: 2, tug: 1.5, grip: 5, mets: 0.5 };
 
-    // ---- Percentile maths ----
-    // Error function approximation, used for the normal distribution
-    function erf(x) {
-        const sign = Math.sign(x);
-        x = Math.abs(x);
-        const t = 1 / (1 + 0.3275911 * x);
-        const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
-        return sign * y;
-    }
-    function normCdf(z) { return 0.5 * (1 + erf(z / Math.SQRT2)); }
+    // Zone colors: key -> CSS color, card border class, tag class
+    const COLORS = {
+        red:    { css: 'var(--below)', border: 'status-red',    tag: 'bg-red' },
+        yellow: { css: 'var(--low)',   border: 'status-yellow', tag: 'bg-yellow' },
+        green:  { css: 'var(--norm)',  border: 'status-green',  tag: 'bg-green' },
+        blue:   { css: 'var(--above)', border: 'status-blue',   tag: 'bg-blue' }
+    };
 
-    // Returns the % of age/sex-matched peers the patient is better than
-    function percentileOf(curr, ref, higherIsBetter) {
-        const z = ref.log
-            ? (Math.log(curr) - Math.log(ref.mean)) / ref.sigma
-            : (curr - ref.mean) / ref.sd;
-        const p = normCdf(z);
-        return (higherIsBetter ? p : 1 - p) * 100;
+    // ---------- Gauge (speedometer) ----------
+    // A "scale" describes the dial:
+    //   sign:    1 if a higher value is better, -1 if a lower value is better
+    //   edges:   zone boundaries in "goodness" space (value x sign), ascending
+    //   weights: share of the dial taken by each zone (sums to 1)
+    //   labels, colors: one per zone (worse on the left, better on the right)
+    //   classify(value): index of the zone the value falls in
+    function toDial(scale, value) {
+        const g = scale.sign * value;
+        const e = scale.edges, w = scale.weights;
+        let start = 0;
+        for (let i = 0; i < w.length; i++) {
+            if (g <= e[i + 1] || i === w.length - 1) {
+                const frac = (g - e[i]) / (e[i + 1] - e[i]);
+                return start + w[i] * Math.min(1, Math.max(0, frac));
+            }
+            start += w[i];
+        }
+        return 0;
     }
 
+    function gaugeSvg(scale, value, title) {
+        const cx = 100, cy = 100, r = 78, sw = 18;
+        const pt = (t, rad) => [cx - rad * Math.cos(Math.PI * t), cy - rad * Math.sin(Math.PI * t)];
+        const gap = 0.008;
+        let arcs = '';
+        let t0 = 0;
+        scale.weights.forEach((wt, i) => {
+            const t1 = t0 + wt;
+            const a = t0 + (i === 0 ? 0 : gap);
+            const b = t1 - (i === scale.weights.length - 1 ? 0 : gap);
+            const p1 = pt(a, r), p2 = pt(b, r);
+            arcs += `<path d="M ${p1[0].toFixed(2)} ${p1[1].toFixed(2)} A ${r} ${r} 0 0 1 ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}" fill="none" stroke="${COLORS[scale.colors[i]].css}" stroke-width="${sw}" />`;
+            t0 = t1;
+        });
+        const t = toDial(scale, value);
+        const tip = pt(t, r - 2);
+        return `<svg viewBox="0 6 200 108" role="img" aria-label="${title} gauge">
+            ${arcs}
+            <line x1="${cx}" y1="${cy}" x2="${tip[0].toFixed(2)}" y2="${tip[1].toFixed(2)}" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
+            <line x1="${cx}" y1="${cy}" x2="${tip[0].toFixed(2)}" y2="${tip[1].toFixed(2)}" stroke="#17323a" stroke-width="3.5" stroke-linecap="round" />
+            <circle cx="${cx}" cy="${cy}" r="8" fill="#17323a" />
+            <circle cx="${cx}" cy="${cy}" r="2.5" fill="#ffffff" />
+        </svg>`;
+    }
+
+    // Scale for tests where the norm is a range (below / in norm / above)
+    function perfScale(low, high, lowerIsBetter) {
+        const W = high - low;
+        const labels = ["Below norm", "In norm", "Above norm"];
+        const colors = ["red", "green", "blue"];
+        const weights = [0.3, 0.4, 0.3];
+        if (!lowerIsBetter) {
+            return { sign: 1, edges: [low - W, low, high, high + W], weights, labels, colors,
+                     classify: v => v < low ? 0 : (v > high ? 2 : 1) };
+        }
+        return { sign: -1, edges: [-(high + W), -high, -low, -low + W], weights, labels, colors,
+                 classify: v => v > high ? 0 : (v < low ? 2 : 1) };
+    }
+
+    // ---------- Cards ----------
+    function renderCard(target, o) {
+        // o: title, curr, prev, unit, scale (or null), normText, note, est, higherIsBetter, mcid
+        const decimals = o.decimals === undefined ? 1 : o.decimals;
+        let idx = null, color = null;
+        if (o.scale) {
+            idx = o.scale.classify(o.curr);
+            color = COLORS[o.scale.colors[idx]];
+        }
+
+        let diffHtml = "";
+        if (!isNaN(o.prev)) {
+            const diff = o.curr - o.prev;
+            const isImprovement = o.higherIsBetter ? diff > 0 : diff < 0;
+            const classType = diff === 0 ? "" : (isImprovement ? "improvement" : "decline");
+            const trendWord = diff === 0 ? "no change" : (isImprovement ? "improvement" : "decline");
+            const sigBadge = (o.mcid !== undefined && Math.abs(diff) >= o.mcid) ? `<span class="sig-badge">Significant</span>` : "";
+            diffHtml = `<span class="diff-text ${classType}">${diff > 0 ? '+' : ''}${diff.toFixed(decimals)}${o.unit} change (${trendWord})${sigBadge}</span>`;
+        }
+
+        let gaugeHtml = "";
+        let tagHtml = "";
+        if (o.scale) {
+            const legend = o.scale.labels.map((lab, i) =>
+                `<span class="${i === idx ? 'active' : ''}"><span class="dot" style="background:${COLORS[o.scale.colors[i]].css}"></span>${lab}</span>`
+            ).join('');
+            gaugeHtml = `<div class="gauge">${gaugeSvg(o.scale, o.curr, o.title)}<div class="legend">${legend}</div></div>`;
+            tagHtml = `<span class="tag ${color.tag}">${o.scale.labels[idx]}</span>`;
+        }
+
+        const normHtml = o.normText ? `<div class="norm-line">Norm: ${o.normText}${o.est ? ' <span class="est-note">(estimated range)</span>' : ''}</div>` : "";
+        const noteHtml = o.note ? `<div class="note">${o.note}</div>` : "";
+
+        const card = document.createElement('div');
+        card.className = `result-card ${color ? color.border : ''}`;
+        card.innerHTML = `
+            <div class="card-head">
+                <span class="card-title">${o.title}</span>
+                ${tagHtml}
+            </div>
+            <div class="card-body">
+                ${gaugeHtml}
+                <div class="info">
+                    <div class="big-value">${o.curr}${o.unit}</div>
+                    ${normHtml}
+                    ${noteHtml}
+                    ${diffHtml}
+                </div>
+            </div>`;
+        target.appendChild(card);
+    }
+
+    function readPair(id) {
+        return {
+            curr: parseFloat(document.getElementById(id + '_curr').value),
+            prev: parseFloat(document.getElementById(id + '_prev').value)
+        };
+    }
+
+    function makeHeading(text) {
+        const h = document.createElement('div');
+        h.className = 'results-heading';
+        h.textContent = text;
+        return h;
+    }
+
+    // ---------- Main ----------
     function calculate() {
         const age = parseInt(document.getElementById('age').value);
         const gender = document.getElementById('gender').value;
@@ -229,95 +373,168 @@
 
         if (!age || isNaN(age)) { alert("Please enter patient age."); return; }
 
-        const mwtEntered = !isNaN(parseFloat(document.getElementById('mwt_curr').value));
-        if (mwtEntered && (isNaN(h) || isNaN(w))) { alert("Please enter height and weight to calculate the 6MWT reference."); return; }
+        const mwt = readPair('mwt');
+        if (!isNaN(mwt.curr) && (isNaN(h) || isNaN(w))) { alert("Please enter height and weight to calculate the 6MWT reference."); return; }
 
         document.getElementById('results').style.display = 'block';
         const container = document.getElementById('cards-container');
         container.innerHTML = '';
 
-        // 6MWT: predicted distance; spread (SD) is an estimate
-        const mwtMean = (gender === 'male') ? 489.22 - (4.33 * age) + (3.19 * h) - (2.18 * w) : 498.06 - (4.80 * age) + (2.64 * h) - (1.24 * w);
-        const mwtRef = { mean: mwtMean, sd: (gender === 'male') ? 93 : 84.5, est: true };
+        // ---- Functional tests ----
+        const functionalCards = document.createElement('div');
 
-        // STS: the table gives the normal range (middle 50%), so the spread comes from that range
-        const stsRow = getSTSNorm(age, gender);
-        const stsRef = { mean: (stsRow.b + stsRow.av) / 2, sd: (stsRow.av - stsRow.b) / 1.349, est: false };
-        const stsNote = age < 60 ? "Reference table starts at age 60, so the 60-64 range is used." : "";
-
-        // TUG: slower is worse; times are right-skewed, so a log scale is used
-        const tugMean = (age < 70) ? 8.1 : (age < 80) ? 9.2 : 11.3;
-        const tugRef = { mean: tugMean, log: true, sigma: 0.22, est: true };
-
-        // Grip: age/sex mean, spread estimated at 20% of the mean
-        const gripMean = getGripNorm(age, gender);
-        const gripRef = { mean: gripMean, sd: gripMean * 0.20, est: true };
-
-        // METs: age-based mean, spread estimated at 20% of the mean
-        const metsMean = 14.7 - (0.11 * age);
-        const metsRef = { mean: metsMean, sd: metsMean * 0.20, est: true };
-
-        processTest(container, "6-Minute Walk Test", "mwt_curr", "mwt_prev", mwtRef, "m", true, MCID.mwt, "");
-        processTest(container, "Sit to Stand (30s)", "sts_curr", "sts_prev", stsRef, " reps", true, MCID.sts, stsNote);
-        processTest(container, "Timed Up and Go", "tug_curr", "tug_prev", tugRef, "s", false, MCID.tug, "");
-        processTest(container, "Grip Strength", "grip_curr", "grip_prev", gripRef, "kg", true, MCID.grip, "");
-        processTest(container, "Ergometry (METs)", "mets_curr", "mets_prev", metsRef, " METs", true, MCID.mets, "");
-    }
-
-    function processTest(target, title, currId, prevId, ref, unit, higherIsBetter, mcidVal, extraNote) {
-        const curr = parseFloat(document.getElementById(currId).value);
-        const prev = parseFloat(document.getElementById(prevId).value);
-        if (isNaN(curr)) return;
-
-        const pctOfRef = (curr / ref.mean) * 100;
-        const pRaw = percentileOf(curr, ref, higherIsBetter);
-        const p = Math.min(99, Math.max(1, Math.round(pRaw)));
-
-        let status, color, tagClass;
-        if (pRaw < 5)       { status = "Below normal";  color = "status-red";    tagClass = "bg-red"; }
-        else if (pRaw < 25) { status = "Low average";   color = "status-yellow"; tagClass = "bg-yellow"; }
-        else if (pRaw <= 75){ status = "Within norms";  color = "status-green";  tagClass = "bg-green"; }
-        else                { status = "Above average"; color = "status-blue";   tagClass = "bg-blue"; }
-
-        let diffHtml = "";
-        if (!isNaN(prev)) {
-            const diff = curr - prev;
-            const isImprovement = higherIsBetter ? diff > 0 : diff < 0;
-            const isSignificant = Math.abs(diff) >= mcidVal;
-            const sigBadge = isSignificant ? `<span class="sig-badge">Significant</span>` : "";
-            const classType = isImprovement ? "improvement" : "decline";
-            const trendWord = isImprovement ? "improvement" : "decline";
-            diffHtml = `<span class="diff-text ${classType}">${diff > 0 ? '+' : ''}${diff.toFixed(1)}${unit} change (${trendWord})${sigBadge}</span>`;
+        // 6MWT: predicted distance, norm range = reference +/- estimated spread
+        if (!isNaN(mwt.curr)) {
+            const mean = (gender === 'male') ? 489.22 - (4.33 * age) + (3.19 * h) - (2.18 * w) : 498.06 - (4.80 * age) + (2.64 * h) - (1.24 * w);
+            const sd = (gender === 'male') ? 93 : 84.5;
+            const low = mean - sd, high = mean + sd;
+            renderCard(functionalCards, { title: "6-Minute Walk Test", curr: mwt.curr, prev: mwt.prev, unit: "m",
+                scale: perfScale(low, high, false), normText: `${low.toFixed(0)}–${high.toFixed(0)} m`, est: true,
+                higherIsBetter: true, mcid: MCID.mwt });
         }
 
-        const estHtml = ref.est ? ` <span class="est-note">(estimate)</span>` : "";
-        const noteHtml = extraNote ? `<div class="note">${extraNote}</div>` : "";
+        // STS: published normal range (60+) or mean ± 1 SD (20-59)
+        const sts = readPair('sts');
+        if (!isNaN(sts.curr)) {
+            const ref = getSTSRange(age, gender);
+            if (ref === null) {
+                renderCard(functionalCards, { title: "Sit to Stand (30s)", curr: sts.curr, prev: sts.prev, unit: " reps", scale: null,
+                    note: "No sit-to-stand reference for this age in the table.", higherIsBetter: true, mcid: MCID.sts, decimals: 0 });
+            } else {
+                renderCard(functionalCards, { title: "Sit to Stand (30s)", curr: sts.curr, prev: sts.prev, unit: " reps",
+                    scale: perfScale(ref.low, ref.high, false), normText: ref.text, note: ref.note,
+                    higherIsBetter: true, mcid: MCID.sts, decimals: 0 });
+            }
+        }
 
-        const card = document.createElement('div');
-        card.className = `result-card ${color}`;
-        card.innerHTML = `
-            <div class="card-head">
-                <span class="card-title">${title}</span>
-                <span class="tag ${tagClass}">${status}</span>
-            </div>
-            <div class="values">Current: ${curr}${unit} &nbsp;|&nbsp; Reference: ${ref.mean.toFixed(1)}${unit} (${pctOfRef.toFixed(0)}%)</div>
-            <div class="pbar-wrap">
-                <div class="pbar"><span class="z-red"></span><span class="z-yellow"></span><span class="z-green"></span><span class="z-blue"></span></div>
-                <div class="marker" style="left:${p}%"></div>
-            </div>
-            <div class="pscale"><span style="left:5%">5</span><span style="left:25%">25</span><span style="left:50%">50</span><span style="left:75%">75</span></div>
-            <div class="ptext">About the ${p}th percentile: better than about ${p}% of matched peers${estHtml}</div>
-            ${noteHtml}
-            ${diffHtml}`;
-        target.appendChild(card);
+        // TUG: slower is worse; norm range = reference x/÷ estimated spread
+        const tug = readPair('tug');
+        if (!isNaN(tug.curr)) {
+            const mean = (age < 70) ? 8.1 : (age < 80) ? 9.2 : 11.3;
+            const low = mean * Math.exp(-0.22), high = mean * Math.exp(0.22);
+            renderCard(functionalCards, { title: "Timed Up and Go", curr: tug.curr, prev: tug.prev, unit: "s",
+                scale: perfScale(low, high, true), normText: `${low.toFixed(1)}–${high.toFixed(1)} s`, est: true,
+                higherIsBetter: false, mcid: MCID.tug });
+        }
+
+        // Grip: norm range = reference +/- 20%
+        const grip = readPair('grip');
+        if (!isNaN(grip.curr)) {
+            const mean = getGripNorm(age, gender);
+            const low = mean * 0.8, high = mean * 1.2;
+            renderCard(functionalCards, { title: "Grip Strength", curr: grip.curr, prev: grip.prev, unit: "kg",
+                scale: perfScale(low, high, false), normText: `${low.toFixed(1)}–${high.toFixed(1)} kg`, est: true,
+                higherIsBetter: true, mcid: MCID.grip });
+        }
+
+        // METs: norm range = reference +/- 20%
+        const mets = readPair('mets');
+        if (!isNaN(mets.curr)) {
+            const mean = 14.7 - (0.11 * age);
+            const low = mean * 0.8, high = mean * 1.2;
+            renderCard(functionalCards, { title: "Ergometry (METs)", curr: mets.curr, prev: mets.prev, unit: " METs",
+                scale: perfScale(low, high, false), normText: `${low.toFixed(1)}–${high.toFixed(1)} METs`, est: true,
+                higherIsBetter: true, mcid: MCID.mets });
+        }
+
+        // ---- Body composition ----
+        const bodyCards = document.createElement('div');
+        let bodyCount = 0;
+
+        // Visceral fat level: norm 1-9, lower is better
+        const vf = readPair('vf');
+        if (!isNaN(vf.curr)) {
+            const scale = { sign: -1, edges: [-20, -9.5, -0.5], weights: [0.4, 0.6],
+                labels: ["High", "Norm"], colors: ["red", "green"], classify: v => v <= 9 ? 1 : 0 };
+            renderCard(bodyCards, { title: "Visceral Fat Level", curr: vf.curr, prev: vf.prev, unit: "",
+                scale: scale, normText: "1–9", higherIsBetter: false, decimals: 0 });
+            bodyCount++;
+        }
+
+        // SMI: male above 7, female above 5.5 (kg/m²)
+        const smi = readPair('smi');
+        if (!isNaN(smi.curr)) {
+            const thr = (gender === 'male') ? 7 : 5.5;
+            const scale = { sign: 1, edges: [thr * 0.6, thr, thr * 1.4], weights: [0.5, 0.5],
+                labels: ["Low", "Normal"], colors: ["red", "green"], classify: v => v >= thr ? 1 : 0 };
+            renderCard(bodyCards, { title: "SMI", curr: smi.curr, prev: smi.prev, unit: " kg/m²",
+                scale: scale, normText: `above ${thr} kg/m²`, higherIsBetter: true });
+            bodyCount++;
+        }
+
+        // SMM/W: male above 25.7%, female above 14.4%
+        const smmw = readPair('smmw');
+        if (!isNaN(smmw.curr)) {
+            const thr = (gender === 'male') ? 25.7 : 14.4;
+            const scale = { sign: 1, edges: [thr * 0.6, thr, thr * 1.4], weights: [0.5, 0.5],
+                labels: ["Low", "Normal"], colors: ["red", "green"], classify: v => v >= thr ? 1 : 0 };
+            renderCard(bodyCards, { title: "SMM/W", curr: smmw.curr, prev: smmw.prev, unit: "%",
+                scale: scale, normText: `above ${thr}%`, higherIsBetter: true });
+            bodyCount++;
+        }
+
+        // PBF: limit depends on age and gender, lower is better
+        const pbf = readPair('pbf');
+        if (!isNaN(pbf.curr)) {
+            const limit = getPBFLimit(age, gender);
+            if (limit === null) {
+                renderCard(bodyCards, { title: "PBF", curr: pbf.curr, prev: pbf.prev, unit: "%", scale: null,
+                    note: "No reference limit for this age and gender in the table.", higherIsBetter: false });
+            } else {
+                const scale = { sign: -1, edges: [-limit * 1.5, -limit, -limit * 0.4], weights: [0.5, 0.5],
+                    labels: ["High", "Normal"], colors: ["red", "green"], classify: v => v < limit ? 1 : 0 };
+                renderCard(bodyCards, { title: "PBF", curr: pbf.curr, prev: pbf.prev, unit: "%",
+                    scale: scale, normText: `below ${limit}%`, higherIsBetter: false });
+            }
+            bodyCount++;
+        }
+
+        // Phase angle: below 4 at risk, 4-7 healthy, above 7 athletic
+        const pa = readPair('pa');
+        if (!isNaN(pa.curr)) {
+            const scale = { sign: 1, edges: [1, 4, 7, 10], weights: [0.3, 0.4, 0.3],
+                labels: ["At risk", "Healthy", "Athletic"], colors: ["red", "green", "blue"],
+                classify: v => v < 4 ? 0 : (v <= 7 ? 1 : 2) };
+            renderCard(bodyCards, { title: "Phase Angle", curr: pa.curr, prev: pa.prev, unit: "°",
+                scale: scale, normText: "4–7°", higherIsBetter: true });
+            bodyCount++;
+        }
+
+        if (functionalCards.children.length > 0) {
+            container.appendChild(makeHeading("Functional tests"));
+            container.appendChild(functionalCards);
+        }
+        if (bodyCount > 0) {
+            container.appendChild(makeHeading("Body composition"));
+            container.appendChild(bodyCards);
+        }
     }
 
-    function getSTSNorm(age, gender) {
-        const data = {
-            female: [{a:64,b:12,av:17},{a:69,b:11,av:16},{a:74,b:10,av:15},{a:79,b:10,av:15},{a:84,b:9,av:14},{a:89,b:8,av:13},{a:200,b:4,av:11}],
-            male: [{a:64,b:14,av:19},{a:69,b:12,av:18},{a:74,b:12,av:17},{a:79,b:11,av:17},{a:84,b:10,av:15},{a:89,b:8,av:14},{a:200,b:7,av:12}]
-        };
-        return data[gender].find(r => age <= r.a);
+    // ---------- Reference data ----------
+
+    // Sit-to-stand (30 s). Ages 60+: published normal range table.
+    // Ages 20-59: mean ± SD. NOTE: check which column is men and which is women in your source.
+    const STS_YOUNG = {
+        male:   { mean: 24.2, sd: 6.3 },
+        female: { mean: 22.6, sd: 6.2 }
+    };
+
+    function getSTSRange(age, gender) {
+        if (age >= 60) {
+            const data = {
+                female: [{a:64,b:12,av:17},{a:69,b:11,av:16},{a:74,b:10,av:15},{a:79,b:10,av:15},{a:84,b:9,av:14},{a:89,b:8,av:13},{a:200,b:4,av:11}],
+                male: [{a:64,b:14,av:19},{a:69,b:12,av:18},{a:74,b:12,av:17},{a:79,b:11,av:17},{a:84,b:10,av:15},{a:89,b:8,av:14},{a:200,b:7,av:12}]
+            };
+            const row = data[gender].find(r => age <= r.a);
+            return { low: row.b, high: row.av, text: `${row.b}–${row.av} reps`, note: "" };
+        }
+        if (age >= 20) {
+            const y = STS_YOUNG[gender];
+            const low = y.mean - y.sd, high = y.mean + y.sd;
+            return { low: low, high: high, text: `${Math.ceil(low)}–${Math.floor(high)} reps`,
+                     note: `Ages 20-59: reference ${y.mean} ± ${y.sd}; norm range is the mean ± 1 SD.` };
+        }
+        return null;
     }
 
     function getGripNorm(age, gender) {
@@ -328,6 +545,16 @@
         const keys = Object.keys(gripData[gender]).map(Number);
         const closestAge = keys.find(k => age <= k);
         return gripData[gender][closestAge];
+    }
+
+    // PBF upper limits (percent body fat) by age group and gender
+    function getPBFLimit(age, gender) {
+        const table = {
+            male:   [{from:20,to:39,limit:26},{from:40,to:59,limit:29},{from:60,to:79,limit:31}],
+            female: [{from:20,to:39,limit:39},{from:40,to:59,limit:41},{from:60,to:79,limit:43}]
+        };
+        const row = table[gender].find(r => age >= r.from && age <= r.to);
+        return row ? row.limit : null;
     }
 </script>
 
