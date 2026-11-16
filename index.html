@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Physio Calculator</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#1f7a7a">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Physio Calc">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -612,6 +618,11 @@
         const gripData = {
             male: {24:48,29:49.3,34:49.7,39:49.5,44:48.8,49:47.6,54:46.2,59:44.4,64:42.4,69:40.1,74:37.7,79:35.1,84:32.3,89:29.4,94:26.3,99:23.1,200:19.8},
             female: {24:28.6,29:29.4,34:29.7,39:29.7,44:29.4,49:28.9,54:28.2,59:27.3,64:26.2,69:25.0,74:23.6,79:22.1,84:20.4,89:18.6,94:16.7,99:14.6,200:12.4}
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+    }
+</script>
         };
         const keys = Object.keys(gripData[gender]).map(Number);
         const closestAge = keys.find(k => age <= k);
