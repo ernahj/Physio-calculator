@@ -1,0 +1,47 @@
+// Service worker: lets the app open offline.
+// Network first (so updates arrive), falling back to the saved copy when offline.
+const CACHE = 'physio-calculator-v1';
+const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
+
+self.addEventListener('install', event => {
+    event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)));
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    );
+    self.clients.claim();
+});
+
+self.addEventListener('fetch', event => {
+    if (event.request.method !== 'GET') return;
+    event.respondWith(
+        fetch(event.request)
+            .then(response => {
+                if (response.ok && new URL(event.request.url).origin === location.origin) {
+                    const copy = response.clone();
+                    caches.open(CACHE).then(cache => cache.put(event.request, copy));
+                }
+                return response;
+            })
+            .catch(() => caches.match(event.request).then(r => r || caches.match('index.html')))
+    );
+});
+
+{
+  "name": "Physio Calculator",
+  "short_name": "Physio Calc",
+  "description": "Physiotherapy assessment and comparison tool",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef4f4",
+  "theme_color": "#1f7a7a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
